@@ -1,0 +1,27 @@
+version: '3'
+
+services: 
+
+  laravel:
+    build: 
+      context: ./node
+      dockerfile: Dockerfile
+    image: robertofsilva6/multistage-nodejs:latest
+    container_name: apiserver
+    networks: 
+      - fullcycle
+
+  nginx:
+    build: 
+      context: ./nginx
+      dockerfile: Dockerfile
+    image: robertofsilva6/multistage-nodejs/nginx:latest
+    container_name: nginx
+    networks: 
+      - fullcycle
+    ports: 
+      - "8080:80"
+
+networks: 
+  fullcycle:
+    driver: bridge      
