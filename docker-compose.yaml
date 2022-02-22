@@ -2,26 +2,48 @@ version: '3'
 
 services: 
 
-  laravel:
+
+  apiserver:
     build: 
       context: ./node
       dockerfile: Dockerfile
     image: robertofsilva6/multistage-nodejs:latest
     container_name: apiserver
+    entrypoint: dockerize -wait tcp://db:3306 -timeout 20s node index.js
     networks: 
-      - fullcycle
+      - desafio2
+    tty: true
+    ports: 
+      - "3000:3000"
+    depends_on: 
+       - db
 
   nginx:
     build: 
       context: ./nginx
       dockerfile: Dockerfile
-    image: robertofsilva6/multistage-nodejs/nginx:latest
+    image: robertofsilva6/nginx-reverseprox:latest
     container_name: nginx
     networks: 
-      - fullcycle
+      - desafio2
     ports: 
       - "8080:80"
 
+  db:
+    image: mysql:5.7
+    command: --innodb-use-native-aio=0
+    container_name: db
+    restart: always
+    tty: true
+    volumes: 
+      - ./db:/var/lib/mysql
+      - ./mysql/scripts-sql:/docker-entrypoint-initdb.d
+    environment: 
+      - MYSQL_DATABASE=nodedb
+      - MYSQL_ROOT_PASSWORD=root
+    networks: 
+      - desafio2
+
 networks: 
-  fullcycle:
+  desafio2:
     driver: bridge      
